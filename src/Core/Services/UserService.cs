@@ -38,6 +38,21 @@ namespace Core.Services
             };
         }
 
+        public async Task<UserResponse> GetAsync(Guid id)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(c => c.Id == id && !c.DateDeleted.HasValue);
+            if (user == null) throw new Exception("ასეთი მომხმარებელი არ არსებობს");
+            
+            return new UserResponse
+            {
+                Id = user.Id,
+                Firstname = user.Firstname,
+                Lastname = user.Lastname,
+                PhoneNumber = user.PhoneNumber,
+                Username = user.Username
+            };
+        }
+
         public async Task<UserResponse> CreateAsync(UserRequest request)
         {
             if(string.IsNullOrEmpty(request.Username)) throw new Exception("მომხმარებლის სახელი ცარიელია");
@@ -82,9 +97,9 @@ namespace Core.Services
             if (userWithSamePhone != null)
                 throw new Exception("მომხმარებელი ასეთი ტელეფონის ნომრით უკვე არსებობს");
 
-            user.Firstname = user.Firstname;
-            user.Lastname = user.Lastname;
-            user.PhoneNumber = user.PhoneNumber;
+            user.Firstname = request.Firstname;
+            user.Lastname = request.Lastname;
+            user.PhoneNumber = request.PhoneNumber;
 
             await _context.SaveChangesAsync();
             
