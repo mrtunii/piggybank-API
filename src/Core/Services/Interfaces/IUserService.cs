@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Data.Database;
 using Data.Request.User;
@@ -12,6 +13,7 @@ namespace Core.Services.Interfaces
         Task<UserResponse> GetAsync(Guid id);
         Task<UserResponse> CreateAsync(UserRequest request);
         Task<UserResponse> UpdateAsync(Guid id, UserRequest request);
+        Task<List<UserRatingResponse>> GetRating(Guid loggedUserId);
 
     }
 }

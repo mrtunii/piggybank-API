@@ -14,11 +14,12 @@ namespace Core
         public ApplicationDbContext(DbContextOptions options) : base(options)
         {
         }
-        
+
         public virtual DbSet<User> Users { get; set; }
         public virtual DbSet<Transaction> Transactions { get; set; }
-        
-            
+        public virtual DbSet<Achievement> Achievements { get; set; }
+
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             var cascadeFKs = modelBuilder.Model.GetEntityTypes()
@@ -27,13 +28,12 @@ namespace Core
 
             foreach (var fk in cascadeFKs)
                 fk.DeleteBehavior = DeleteBehavior.Restrict;
-            
+
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.ApplyConfiguration(new UserConfiguration());
             modelBuilder.ApplyConfiguration(new TransactionConfiguration());
-            
-
+            modelBuilder.ApplyConfiguration(new AchievementConfiguration());
         }
     }
 }

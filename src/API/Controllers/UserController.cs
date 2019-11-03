@@ -1,5 +1,6 @@
 using System;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -60,6 +61,15 @@ namespace API.Controllers
         {
             var user = await _userService.GetAsync(id);
             return Ok(new ApiOkResponse(user));
+        }
+
+        [HttpGet("ratings")]
+        [Authorize]
+        public async Task<IActionResult> Rating()
+        {
+            var authUserId =
+                Guid.Parse(HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id").Value);
+            return Ok(await _userService.GetRating(authUserId));
         }
 
         #region Helpers

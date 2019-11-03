@@ -37,9 +37,16 @@ namespace Data.Database.Configuration
             builder.Property(c => c.Point)
                 .HasDefaultValue(0);
 
+            builder.Property(c => c.Level)
+                .HasDefaultValue(1);
+
             builder.HasMany(c => c.Transactions)
                 .WithOne(c => c.User)
                 .HasForeignKey(c => c.UserId);
+
+            builder.HasOne(c => c.Achievement)
+                .WithMany(c => c.Users)
+                .HasForeignKey(c => c.AchievementId);
         }
     }
 }

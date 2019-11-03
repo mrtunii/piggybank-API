@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Core.Helpers;
@@ -42,7 +43,7 @@ namespace Core.Services
         {
             var user = await _context.Users.FirstOrDefaultAsync(c => c.Id == id && !c.DateDeleted.HasValue);
             if (user == null) throw new Exception("ასეთი მომხმარებელი არ არსებობს");
-            
+
             return new UserResponse
             {
                 Id = user.Id,
@@ -55,8 +56,8 @@ namespace Core.Services
 
         public async Task<UserResponse> CreateAsync(UserRequest request)
         {
-            if(string.IsNullOrEmpty(request.Username)) throw new Exception("მომხმარებლის სახელი ცარიელია");
-            if(string.IsNullOrEmpty(request.Password)) throw new Exception("პაროლი ცარიელია");
+            if (string.IsNullOrEmpty(request.Username)) throw new Exception("მომხმარებლის სახელი ცარიელია");
+            if (string.IsNullOrEmpty(request.Password)) throw new Exception("პაროლი ცარიელია");
             var existingUser = await _context.Users.FirstOrDefaultAsync(c =>
                 (c.Username == request.Username || c.PhoneNumber == request.PhoneNumber) && !c.DateDeleted.HasValue);
             if (existingUser != null) throw new Exception("ასეთი მომხმარებელი უკვე არსებობს");
@@ -92,7 +93,7 @@ namespace Core.Services
             if (user == null) throw new Exception("ასეთი მომხმარებელი არ არსებობს");
 
             var userWithSamePhone = await _context.Users.FirstOrDefaultAsync(c =>
-                c.Id != id &&  c.PhoneNumber == request.PhoneNumber &&
+                c.Id != id && c.PhoneNumber == request.PhoneNumber &&
                 !c.DateDeleted.HasValue);
             if (userWithSamePhone != null)
                 throw new Exception("მომხმარებელი ასეთი ტელეფონის ნომრით უკვე არსებობს");
@@ -102,7 +103,7 @@ namespace Core.Services
             user.PhoneNumber = request.PhoneNumber;
 
             await _context.SaveChangesAsync();
-            
+
             return new UserResponse
             {
                 Id = user.Id,
@@ -111,6 +112,37 @@ namespace Core.Services
                 PhoneNumber = user.PhoneNumber,
                 Username = user.Username
             };
+        }
+
+        public async Task<List<UserRatingResponse>> GetRating(Guid loggedUserId)
+        {
+            var users = await _context.Users.OrderByDescending(c => c.Point).Where(c => !c.DateDeleted.HasValue)
+                .ToListAsync();
+            var result = new List<UserRatingResponse>();
+            foreach (var user in users)
+            {
+                var fullName = $"{user.Firstname} {user.Lastname}";
+                if (user.Id == loggedUserId)
+                {
+                    result.Add(new UserRatingResponse
+                    {
+                        FullName = fullName.SubsituteString(1, fullName.Length - 2, new string('*',fullName.Length -2)),
+                        Points = user.Point,
+                        IsCurrentUser = false
+                    });
+                }
+                else
+                {
+                    result.Add(new UserRatingResponse
+                    {
+                        FullName = fullName,
+                        Points = user.Point,
+                        IsCurrentUser = true
+                    });
+                }
+            }
+
+            return result;
         }
     }
 }
